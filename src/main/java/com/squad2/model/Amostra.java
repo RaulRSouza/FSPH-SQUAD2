@@ -1,5 +1,6 @@
 package com.squad2.model;
 
+import com.squad2.dtos.AmostraDto;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,14 +11,14 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "amostras")
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class Amostra {
+public class Amostra {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "data_coleta", nullable = false)
-    private LocalDateTime dataColeta;
+    private String dataColeta;
 
     @Column(name = "hora_coleta", nullable = false)
     private String horaColeta;
@@ -42,13 +43,12 @@ private TipoAmostra tipoAmostra;
 private Status status;
 
     // Construtor 
-    public Amostra(LocalDateTime dataColeta, String horaColeta, String municipio, 
-                   String coletor, String endereco, TipoAmostra tipoAmostra, Status status) {
-        this.dataColeta = dataColeta;
-        this.horaColeta = horaColeta;
-        this.municipio = municipio;
-        this.coletor = coletor;
-        this.endereco = endereco;
+    public Amostra(AmostraDto amostra, TipoAmostra tipoAmostra, Status status) {
+        this.dataColeta = amostra.dataColeta();
+        this.horaColeta = amostra.horaColeta();
+        this.municipio = amostra.municipio();
+        this.coletor = amostra.coletor();
+        this.endereco = amostra.endereco();
         this.tipoAmostra = tipoAmostra;
         this.status = status; // <-- NOVO PARÂMETRO
     }

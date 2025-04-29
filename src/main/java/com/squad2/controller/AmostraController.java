@@ -1,6 +1,7 @@
 // src/main/java/com/squad2/controller/AmostraController.java
 package com.squad2.controller;
 
+import com.squad2.dtos.AmostraDto;
 import com.squad2.model.Amostra;
 import com.squad2.model.Status;
 import com.squad2.model.TipoAmostra;
@@ -19,39 +20,18 @@ import java.util.List;
 public class AmostraController {
 
     private final AmostraService amostraService;
-    private final TipoAmostraRepository tipoAmostraRepository;
-    private final StatusRepository statusRepository;
 
-    public AmostraController(
-        AmostraService amostraService,
-        TipoAmostraRepository tipoAmostraRepository,
-        StatusRepository statusRepository
-    ) {
+    public AmostraController(AmostraService amostraService) {
         this.amostraService = amostraService;
-        this.tipoAmostraRepository = tipoAmostraRepository;
-        this.statusRepository = statusRepository;
     }
 
     @PostMapping
     @Operation(summary = "Criar nova amostra", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<?> criarAmostra(@RequestBody Amostra amostra) {
+    public ResponseEntity<?> criarAmostra(@RequestBody AmostraDto amostra) {
         try {
-            // Validação do Tipo de Amostra
-            TipoAmostra tipoAmostra = tipoAmostraRepository
-                .findById(amostra.getTipoAmostra().getId())
-                .orElseThrow(() -> new RuntimeException("Tipo de amostra não encontrado"));
 
-            // Validação do Status
-            Status status = statusRepository
-                .findById(amostra.getStatus().getId())
-                .orElseThrow(() -> new RuntimeException("Status não encontrado"));
-
-            // Atualiza os relacionamentos
-            amostra.setTipoAmostra(tipoAmostra);
-            amostra.setStatus(status);
-
-            Amostra novaAmostra = amostraService.criarAmostra(amostra);
-            return ResponseEntity.ok(novaAmostra);
+            amostraService.criarAmostra(amostra);
+            return ResponseEntity.ok(amostra);
 
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
