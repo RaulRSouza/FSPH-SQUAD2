@@ -3,6 +3,7 @@ package com.squad2.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
 @Data
@@ -24,32 +25,39 @@ public abstract class Amostra {
 
     @Column(nullable = false)
     private String municipio;
-    
+
     @Column(nullable = false)
     private String coletor;
 
     @Column(nullable = false)
     private String endereco;
 
-// Relacionamento com TipoAmostra
-@ManyToOne
-@JoinColumn(name = "tipo_amostra_id", nullable = false)
-private TipoAmostra tipoAmostra;
+    // Substituindo entidade TipoAmostra por enum
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_amostra", nullable = false)
+    private TipoAmostraEnum tipoAmostra;
 
-// Relacionamento com Status
-@ManyToOne
-@JoinColumn(name = "status_id", nullable = false)
-private Status status;
+    // Substituindo entidade Status por enum
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private StatusEnvio status;
 
-    // Construtor 
-    public Amostra(LocalDateTime dataColeta, String horaColeta, String municipio, 
-                   String coletor, String endereco, TipoAmostra tipoAmostra, Status status) {
+    // Construtor com todos os campos
+    public Amostra(
+            LocalDateTime dataColeta,
+            String horaColeta,
+            String municipio,
+            String coletor,
+            String endereco,
+            TipoAmostraEnum tipoAmostra,
+            StatusEnvio status
+    ) {
         this.dataColeta = dataColeta;
         this.horaColeta = horaColeta;
         this.municipio = municipio;
         this.coletor = coletor;
         this.endereco = endereco;
         this.tipoAmostra = tipoAmostra;
-        this.status = status; // <-- NOVO PARÂMETRO
+        this.status = status;
     }
 }

@@ -1,11 +1,7 @@
-// src/main/java/com/squad2/controller/AmostraController.java
 package com.squad2.controller;
 
-import com.squad2.model.Amostra;
-import com.squad2.model.Status;
-import com.squad2.model.TipoAmostra;
-import com.squad2.repository.StatusRepository;
-import com.squad2.repository.TipoAmostraRepository;
+import com.squad2.dto.AmostraRequestDTO;
+import com.squad2.dto.AmostraResponseDTO;
 import com.squad2.service.AmostraService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -19,71 +15,65 @@ import java.util.List;
 public class AmostraController {
 
     private final AmostraService amostraService;
-    private final TipoAmostraRepository tipoAmostraRepository;
-    private final StatusRepository statusRepository;
 
-    public AmostraController(
-        AmostraService amostraService,
-        TipoAmostraRepository tipoAmostraRepository,
-        StatusRepository statusRepository
-    ) {
+    public AmostraController(AmostraService amostraService) {
         this.amostraService = amostraService;
-        this.tipoAmostraRepository = tipoAmostraRepository;
-        this.statusRepository = statusRepository;
     }
 
     @PostMapping
-    @Operation(summary = "Criar nova amostra", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<?> criarAmostra(@RequestBody Amostra amostra) {
+    @Operation(
+        summary = "Criar nova amostra",
+        tags = {"POST - Criar amostra"},
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    public ResponseEntity<?> criarAmostra(@RequestBody AmostraRequestDTO dto) {
         try {
-            // Validação do Tipo de Amostra
-            TipoAmostra tipoAmostra = tipoAmostraRepository
-                .findById(amostra.getTipoAmostra().getId())
-                .orElseThrow(() -> new RuntimeException("Tipo de amostra não encontrado"));
-
-            // Validação do Status
-            Status status = statusRepository
-                .findById(amostra.getStatus().getId())
-                .orElseThrow(() -> new RuntimeException("Status não encontrado"));
-
-            // Atualiza os relacionamentos
-            amostra.setTipoAmostra(tipoAmostra);
-            amostra.setStatus(status);
-
-            Amostra novaAmostra = amostraService.criarAmostra(amostra);
+            AmostraResponseDTO novaAmostra = amostraService.criarAmostra(dto);
             return ResponseEntity.ok(novaAmostra);
-
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @GetMapping
-    @Operation(summary = "Listar todas as amostras")
-    public ResponseEntity<List<Amostra>> listarAmostras() {
-        List<Amostra> amostras = amostraService.listarAmostras();
-        return ResponseEntity.ok(amostras);
+    @Operation(
+        summary = "Listar todas as amostras",
+        tags = {"GET - Listar amostras"}
+    )
+    public ResponseEntity<List<AmostraResponseDTO>> listarAmostras() {
+        return ResponseEntity.ok(amostraService.listarAmostras());
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Buscar amostra por ID")
-    public ResponseEntity<Amostra> buscarPorId(@PathVariable Long id) {
+    @Operation(
+        summary = "Buscar amostra por ID",
+        tags = {"GET - Buscar amostra por ID"}
+    )
+    public ResponseEntity<AmostraResponseDTO> buscarPorId(@PathVariable Long id) {
         return amostraService.buscarPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Atualizar amostra", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<Amostra> atualizarAmostra(
+    @Operation(
+        summary = "Atualizar amostra",
+        tags = {"PUT - Atualizar amostra"},
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    public ResponseEntity<AmostraResponseDTO> atualizarAmostra(
             @PathVariable Long id,
-            @RequestBody Amostra amostra) {
-        Amostra amostraAtualizada = amostraService.atualizarAmostra(id, amostra);
+            @RequestBody AmostraRequestDTO dto) {
+        AmostraResponseDTO amostraAtualizada = amostraService.atualizarAmostra(id, dto);
         return ResponseEntity.ok(amostraAtualizada);
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Deletar amostra", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(
+        summary = "Deletar amostra",
+        tags = {"DELETE - Deletar amostra"},
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
     public ResponseEntity<Void> deletarAmostra(@PathVariable Long id) {
         amostraService.deletarAmostra(id);
         return ResponseEntity.noContent().build();
