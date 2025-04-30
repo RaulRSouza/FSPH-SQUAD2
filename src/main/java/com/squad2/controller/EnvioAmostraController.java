@@ -1,4 +1,3 @@
-
 package com.squad2.controller;
 
 import com.squad2.model.EnvioAmostra;
@@ -21,7 +20,11 @@ public class EnvioAmostraController {
     }
 
     @PostMapping
-    @Operation(summary = "Cadastrar envio de amostra", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(
+        summary = "Cadastrar envio de amostra",
+        tags = {"POST - Cadastrar envio"},
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
     public ResponseEntity<EnvioAmostra> criarEnvio(
             @RequestBody EnvioAmostra envio,
             @AuthenticationPrincipal Municipio municipio) {

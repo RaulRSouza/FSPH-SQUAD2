@@ -1,57 +1,58 @@
-// src/main/java/com/squad2/service/AmostraService.java
 package com.squad2.service;
 
+import com.squad2.dto.AmostraRequestDTO;
+import com.squad2.dto.AmostraResponseDTO;
+import com.squad2.mapper.AmostraMapper;
 import com.squad2.model.Amostra;
 import com.squad2.repository.AmostraRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AmostraService {
 
     private final AmostraRepository amostraRepository;
 
-    @Autowired
     public AmostraService(AmostraRepository amostraRepository) {
         this.amostraRepository = amostraRepository;
     }
 
-    // Criar uma nova amostra
-    public Amostra criarAmostra(Amostra amostra) {
-        return amostraRepository.save(amostra);
+    public AmostraResponseDTO criarAmostra(AmostraRequestDTO dto) {
+        Amostra amostra = AmostraMapper.toEntity(dto);
+        Amostra salva = amostraRepository.save(amostra);
+        return AmostraMapper.toResponseDTO(salva);
     }
 
-    // Buscar todas as amostras
-    public List<Amostra> listarAmostras() {
-        return amostraRepository.findAll();
+    public List<AmostraResponseDTO> listarAmostras() {
+        return amostraRepository.findAll()
+                .stream()
+                .map(AmostraMapper::toResponseDTO)
+                .collect(Collectors.toList());
     }
 
-    // Buscar amostra por ID
-    public Optional<Amostra> buscarPorId(Long id) {
-        return amostraRepository.findById(id);
+    public Optional<AmostraResponseDTO> buscarPorId(Long id) {
+        return amostraRepository.findById(id)
+                .map(AmostraMapper::toResponseDTO);
     }
 
-    // src/main/java/com/squad2/service/AmostraService.java
-public Amostra atualizarAmostra(Long id, Amostra amostraAtualizada) {
-    return amostraRepository.findById(id)
-        .map(amostra -> {
-            // Atualiza todos os campos
-            amostra.setTipoAmostra(amostraAtualizada.getTipoAmostra());
-            amostra.setDataColeta(amostraAtualizada.getDataColeta());
-            amostra.setHoraColeta(amostraAtualizada.getHoraColeta());
-            amostra.setMunicipio(amostraAtualizada.getMunicipio());
-            amostra.setColetor(amostraAtualizada.getColetor());
-            amostra.setEndereco(amostraAtualizada.getEndereco());
-            amostra.setTipoAmostra(amostraAtualizada.getTipoAmostra());
-            amostra.setStatus(amostraAtualizada.getStatus());
-            return amostraRepository.save(amostra);
-        })
-        .orElseThrow(() -> new RuntimeException("Amostra não encontrada"));
-}
+    public AmostraResponseDTO atualizarAmostra(Long id, AmostraRequestDTO dto) {
+        return amostraRepository.findById(id)
+                .map(existing -> {
+                    existing.setDataColeta(dto.getDataColeta());
+                    existing.setHoraColeta(dto.getHoraColeta());
+                    existing.setMunicipio(dto.getMunicipio());
+                    existing.setColetor(dto.getColetor());
+                    existing.setEndereco(dto.getEndereco());
+                    existing.setTipoAmostra(dto.getTipoAmostra());
+                    existing.setStatus(dto.getStatus());
+                    return AmostraMapper.toResponseDTO(amostraRepository.save(existing));
+                })
+                .orElseThrow(() -> new RuntimeException("Amostra não encontrada com ID: " + id));
+    }
 
-    // Deletar amostra
     public void deletarAmostra(Long id) {
         amostraRepository.deleteById(id);
     }
